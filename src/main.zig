@@ -57,7 +57,7 @@ pub fn main() !void {
                     _ = c.SDL_GetMouseState(&mouse_x, &mouse_y);
                     mouse_x = @divFloor(mouse_x, CELL_SIZE);
                     mouse_y = @divFloor(mouse_y, CELL_SIZE);
-                    std.debug.print("x: {}, y: {}\n", .{ mouse_x, mouse_y });
+                    // std.debug.print("x: {}, y: {}\n", .{ mouse_x, mouse_y });
                     grid[@intCast(usize, mouse_x + mouse_y * GRID_WIDTH)] = !grid[@intCast(usize, mouse_x + mouse_y * GRID_WIDTH)];
                 },
                 else => {},
