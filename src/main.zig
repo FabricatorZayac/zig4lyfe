@@ -4,13 +4,13 @@ const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 
-const DISPLAY_WIDTH = 600;
-const DISPLAY_HEIGHT = 600;
+const DISPLAY_WIDTH = 1500;
+const DISPLAY_HEIGHT = 1000;
 
-const GRID_WIDTH = 50;
-const GRID_HEIGHT = 50;
+const GRID_WIDTH = 150;
+const GRID_HEIGHT = 100;
 
-const CELL_SIZE = DISPLAY_HEIGHT / GRID_HEIGHT;
+const CELL_SIZE = DISPLAY_HEIGHT / @min(GRID_HEIGHT, GRID_WIDTH);
 
 const CELL_COLOR = 0xfb4934;
 const CELL_OUTLINE = 0x928374;
@@ -35,12 +35,6 @@ pub fn main() !void {
 
     var grid: [GRID_HEIGHT * GRID_WIDTH]bool = undefined;
     for (grid) |*cell| cell.* = false;
-
-    grid[3 + 1 * GRID_WIDTH] = true;
-    grid[3 + 2 * GRID_WIDTH] = true;
-    grid[3 + 3 * GRID_WIDTH] = true;
-    grid[2 + 3 * GRID_WIDTH] = true;
-    grid[1 + 2 * GRID_WIDTH] = true;
 
     var quit = false;
     var last_ticks = c.SDL_GetTicks();
