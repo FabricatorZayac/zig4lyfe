@@ -34,7 +34,7 @@ pub fn main() !void {
     defer c.SDL_DestroyRenderer(renderer);
 
     var grid: [GRID_HEIGHT * GRID_WIDTH]bool = undefined;
-    for (grid) |*cell| cell.* = false;
+    for (&grid) |*cell| cell.* = false;
 
     var quit = false;
     var last_ticks = c.SDL_GetTicks();
@@ -42,7 +42,7 @@ pub fn main() !void {
     while (!quit) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
-            switch (event.@"type") {
+            switch (event.type) {
                 c.SDL_QUIT => quit = true,
                 c.SDL_KEYDOWN => running = !running,
                 c.SDL_MOUSEBUTTONDOWN => {
@@ -52,7 +52,7 @@ pub fn main() !void {
                     mouse_x = @divFloor(mouse_x, CELL_SIZE);
                     mouse_y = @divFloor(mouse_y, CELL_SIZE);
                     // std.debug.print("x: {}, y: {}\n", .{ mouse_x, mouse_y });
-                    grid[@intCast(usize, mouse_x + mouse_y * GRID_WIDTH)] = !grid[@intCast(usize, mouse_x + mouse_y * GRID_WIDTH)];
+                    grid[@intCast(mouse_x + mouse_y * GRID_WIDTH)] = !grid[@intCast(mouse_x + mouse_y * GRID_WIDTH)];
                 },
                 else => {},
             }
@@ -77,13 +77,13 @@ pub fn main() !void {
 fn lifeTick(grid: *[GRID_WIDTH * GRID_HEIGHT]bool) void {
     var new_grid: [GRID_WIDTH * GRID_HEIGHT]bool = undefined;
 
-    outer: for (grid) |cell, i| {
+    outer: for (grid, 0..grid.len) |cell, i| {
         if (@divFloor(i, GRID_WIDTH) == 0 or @mod(i, GRID_WIDTH) == 0) {
             new_grid[i] = false;
             continue;
         }
 
-        const pos = @intCast(i32, i);
+        const pos = @as(i32, @intCast(i));
         var neighbors: i32 = 0;
         // TODO: bounds checking
         var x: i32 = -1;
@@ -94,7 +94,7 @@ fn lifeTick(grid: *[GRID_WIDTH * GRID_HEIGHT]bool) void {
                 if (pos + x + y >= GRID_WIDTH * GRID_HEIGHT) break :outer;
                 if (x + y == 0) {
                     continue;
-                } else if (grid[@intCast(usize, pos + x + y)]) neighbors += 1;
+                } else if (grid[@as(usize, @intCast(pos + x + y))]) neighbors += 1;
             }
         }
         if (neighbors < 2 or neighbors > 3) {
@@ -109,8 +109,8 @@ fn lifeTick(grid: *[GRID_WIDTH * GRID_HEIGHT]bool) void {
 }
 
 fn renderGrid(renderer: *c.SDL_Renderer, grid: []bool) void {
-    for (grid) |cell, i| {
-        var pos = @intCast(i32, i);
+    for (grid, 0..) |cell, i| {
+        var pos = @as(i32, @intCast(i));
         if (cell) renderCell(renderer, &makeCell(@mod(pos, GRID_WIDTH), @divFloor(pos, GRID_WIDTH)));
     }
 }
@@ -139,5 +139,5 @@ fn renderCell(renderer: *c.SDL_Renderer, rect: *const c.SDL_Rect) void {
 }
 
 fn setColor(renderer: *c.SDL_Renderer, color: u24) void {
-    _ = c.SDL_SetRenderDrawColor(renderer, @truncate(u8, color >> 16) & 0xFF, @truncate(u8, color >> 8) & 0xFF, @truncate(u8, color >> 0) & 0xFF, 0xFF);
+    _ = c.SDL_SetRenderDrawColor(renderer, @as(u8, @truncate(color >> 16)) & 0xFF, @as(u8, @truncate(color >> 8)) & 0xFF, @as(u8, @truncate(color >> 0)) & 0xFF, 0xFF);
 }
